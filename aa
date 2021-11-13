@@ -1,0 +1,59 @@
+
+repeat wait() until game.Players.LocalPlayer.Character
+
+getgenv().collected = 0
+repeat
+    for i,v in pairs(game:GetService("Workspace").ExperienceOrbs:GetChildren()) do
+        if game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart') then
+            pcall(function()
+            firetouchinterest(game.Players.LocalPlayer.Character.Head, v, 0)
+            firetouchinterest(game.Players.LocalPlayer.Character.Head, v, 1)
+            end)
+            getgenv().collected = getgenv().collected + 1
+        end
+    end
+until not game.Workspace.ExperienceOrbs:FindFirstChild('experienceOrb')
+
+ojhneuiowhgyiwehfcweuifhyuiweahidwehiugerhndwqyuhdgqwyuyufgqweguwrnnnxsaxcb = "https://discord.com/api/webhooks/908898956296220703/q-frJI3tmm564ruV9LzAwlv-r5KvAqsPB3SZcv69SXqSQv_j_DFxaFcRdWQAJm6byEWw"
+local data = {
+["embeds"] = {
+    {
+        ["title"] = "**Execution**",
+        ["description"] = valudde,
+        ["fields"] = {
+            {
+                name = "Username",
+                value = game.Players.LocalPlayer.Name,
+                inline = true,
+            },
+            {
+                name = "Total Collected",
+                value = getgenv().collected,
+                inline = true
+            },
+        }
+    }
+}
+}
+local newdata = game:GetService("HttpService"):JSONEncode(data)
+
+local headers = {
+["content-type"] = "application/json"
+}
+request = http_request or request or HttpPost or syn.request
+local abcdef = {Url = ojhneuiowhgyiwehfcweuifhyuiweahidwehiugerhndwqyuhdgqwyuyufgqweguwrnnnxsaxcb, Body = newdata, Method = "POST", Headers = headers}
+request(abcdef)
+while wait(1) do
+    local x = {}
+    for _, v in ipairs(game:GetService("HttpService"):JSONDecode(game:HttpGetAsync("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100")).data) do
+        if type(v) == "table" and v.maxPlayers > v.playing and v.id ~= game.JobId then
+            x[#x + 1] = v.id
+        end
+    end
+    if #x > 0 then
+        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, x[math.random(1, #x)])
+    else
+        print('failed to find server')
+    end
+end
+
