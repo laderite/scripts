@@ -191,6 +191,7 @@ local name = game:GetService('HttpService'):UrlEncode(GetName.Name)
 for _, v in pairs(game:GetService("HttpService"):JSONDecode(game:HttpGetAsync("https://www.scriptblox.com/api/script/search?q=" .. name))) do
     for _,v in pairs(v['scripts']) do
         if game.CoreGui:FindFirstChild('Cloudscripts') then
+	    if not (v['game']['gameId'] == game.PlaceId)  then continue end
             local a = game.CoreGui.Cloudscripts.Bckg.Main.ScriptMain:Clone()
             a.Script.Image = ("https://www.roblox.com/asset-thumbnail/image?assetId=%s&width=768&height=432&format=png"):format(game.PlaceId)
             a.Script:FindFirstChild('TextLabel').Text = "VIEWS: " .. v['views']
