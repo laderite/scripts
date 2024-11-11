@@ -1,7 +1,7 @@
-if getgenv().EspInterface then
+--[[if getgenv().EspInterface then
     getgenv().EspInterface.Unload()
     getgenv().EspInterface = nil
-end
+end]]
 -- services
 local runService = game:GetService("RunService");
 local players = game:GetService("Players");
@@ -886,5 +886,5 @@ function EspInterface.getPosture(player)
     return 100, 100;
 end
 
-EspInterface.Load()
---return EspInterface
+--EspInterface.Load()
+return EspInterface
