@@ -3,8 +3,6 @@
     getgenv().EspInterface = nil
 end]]
 
--- Sense modified
-
 -- services
 local runService = game:GetService("RunService");
 local players = game:GetService("Players");
@@ -617,16 +615,16 @@ local EspInterface = {
 			enabled = true,
 			box = false,
 			boxColor = { Color3.new(1,0,0), 1 },
-			boxOutline = true,
+			boxOutline = false,
 			boxOutlineColor = { Color3.new(), 1 },
 			boxFill = false,
 			boxFillColor = { Color3.new(1,0,0), 0.5 },
-			healthBar = true,
+			healthBar = false,
 			healthyColor = Color3.new(0,1,0),
 			dyingColor = Color3.new(1,0,0),
 			healthBarOutline = true,
 			healthBarOutlineColor = { Color3.new(), 0.5 },
-			healthText = true,
+			healthText = false,
 			healthTextColor = { Color3.new(1,1,1), 1 },
 			healthTextOutline = true,
 			healthTextOutlineColor = Color3.new(),
