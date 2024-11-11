@@ -1,8 +1,7 @@
---[[if getgenv().EspInterface then
+if getgenv().EspInterface then
     getgenv().EspInterface.Unload()
     getgenv().EspInterface = nil
-end]]
-
+end
 -- services
 local runService = game:GetService("RunService");
 local players = game:GetService("Players");
@@ -50,6 +49,10 @@ local HEALTH_BAR_OUTLINE_OFFSET = Vector2.new(0, 1);
 local LIFEFORCE_BAR_OFFSET = Vector2.new(-5, 0);  -- Opposite side of health bar
 local LIFEFORCE_TEXT_OFFSET = Vector2.new(-3, 0);
 local LIFEFORCE_BAR_OUTLINE_OFFSET = Vector2.new(0, 1);
+
+local POSTURE_BAR_OFFSET = Vector2.new(5, 0);  -- Same side as health bar, but further out
+local POSTURE_TEXT_OFFSET = Vector2.new(3, 0);
+local POSTURE_BAR_OUTLINE_OFFSET = Vector2.new(0, 1);
 
 local LEVEL_OFFSET = Vector2.new(0, -2); -- Adjust value as needed
 
@@ -183,6 +186,9 @@ function EspObject:Construct()
             lifeforceBar = self:_create("Line", { Thickness = 1, Visible = false }),
             lifeforceText = self:_create("Text", { Center = true, Visible = false }),
 			name = self:_create("Text", { Text = self.player.DisplayName, Center = true, Visible = false }),
+            postureBarOutline = self:_create("Line", { Thickness = 3, Visible = false }),
+            postureBar = self:_create("Line", { Thickness = 1, Visible = false }),
+            postureText = self:_create("Text", { Center = true, Visible = false }),
 			distance = self:_create("Text", { Center = true, Visible = false }),
 			weapon = self:_create("Text", { Center = true, Visible = false }),
             level = self:_create("Text", { Center = true, Visible = false }),
@@ -219,6 +225,7 @@ function EspObject:Update()
     self.trueLevel = self.character and self.character:GetAttribute("trueLVL");
     self.level = self.character and self.character:GetAttribute("LVL");
 	self.weapon = interface.getWeapon(self.player);
+    self.posture, self.maxPosture = interface.getPosture(self.player);
 	self.enabled = self.options.enabled and self.character and not
 		(#interface.whitelist > 0 and not find(interface.whitelist, self.player.UserId));
 
@@ -271,6 +278,40 @@ function EspObject:Render()
 	local interface = self.interface;
 	local options = self.options;
 	local corners = self.corners;
+
+    visible.postureBar.Visible = enabled and onScreen and options.postureBar;
+    visible.postureBarOutline.Visible = visible.postureBar.Visible and options.postureBarOutline;
+    if visible.postureBar.Visible then
+        local barFrom = corners.topLeft - POSTURE_BAR_OFFSET - Vector2.new(5, 0);  -- 5 units further out than health bar
+        local barTo = corners.bottomLeft - POSTURE_BAR_OFFSET - Vector2.new(5, 0);
+
+        local postureBar = visible.postureBar;
+        postureBar.To = barTo;
+        postureBar.From = lerp2(barTo, barFrom, self.posture/self.maxPosture);
+        postureBar.Color = lerpColor(Color3.new(0.7, 0.3, 0), Color3.new(1, 0.5, 0), self.posture/self.maxPosture);
+
+        local postureBarOutline = visible.postureBarOutline;
+        postureBarOutline.To = barTo + POSTURE_BAR_OUTLINE_OFFSET;
+        postureBarOutline.From = barFrom - POSTURE_BAR_OUTLINE_OFFSET;
+        postureBarOutline.Color = parseColor(self, options.postureBarOutlineColor[1], true);
+        postureBarOutline.Transparency = options.postureBarOutlineColor[2];
+    end
+
+    visible.postureText.Visible = enabled and onScreen and options.postureText;
+    if visible.postureText.Visible then
+        local barFrom = corners.topLeft - POSTURE_BAR_OFFSET - Vector2.new(5, 0);
+        local barTo = corners.bottomLeft - POSTURE_BAR_OFFSET - Vector2.new(5, 0);
+
+        local postureText = visible.postureText;
+        postureText.Text = round(self.posture) .. " posture";
+        postureText.Size = interface.sharedSettings.textSize;
+        postureText.Font = interface.sharedSettings.textFont;
+        postureText.Color = parseColor(self, options.postureTextColor[1]);
+        postureText.Transparency = options.postureTextColor[2];
+        postureText.Outline = options.postureTextOutline;
+        postureText.OutlineColor = parseColor(self, options.postureTextOutlineColor, true);
+        postureText.Position = lerp2(barTo, barFrom, self.posture/self.maxPosture) - postureText.TextBounds*0.5 - POSTURE_TEXT_OFFSET;
+    end
 
     visible.level.Visible = enabled and onScreen and options.level;
     if visible.level.Visible then
@@ -619,7 +660,7 @@ local EspInterface = {
 			boxOutlineColor = { Color3.new(), 1 },
 			boxFill = false,
 			boxFillColor = { Color3.new(1,0,0), 0.5 },
-			healthBar = false,
+			healthBar = true,
 			healthyColor = Color3.new(0,1,0),
 			dyingColor = Color3.new(1,0,0),
 			healthBarOutline = true,
@@ -668,6 +709,13 @@ local EspInterface = {
             levelColor = { Color3.new(1, 1, 1), 1 },
             levelOutline = true,
             levelOutlineColor = Color3.new(),
+            postureBar = true,
+            postureBarOutline = true,
+            postureBarOutlineColor = { Color3.new(), 0.5 },
+            postureText = false,
+            postureTextColor = { Color3.new(1,1,1), 1 },
+            postureTextOutline = true,
+            postureTextOutlineColor = Color3.new(),
 		},
 		friendly = {
 			enabled = false,
@@ -726,6 +774,13 @@ local EspInterface = {
             levelColor = { Color3.new(1, 1, 1), 1 },
             levelOutline = true,
             levelOutlineColor = Color3.new(),
+            postureBar = true,
+            postureBarOutline = true,
+            postureBarOutlineColor = { Color3.new(), 0.5 },
+            postureText = false,
+            postureTextColor = { Color3.new(1,1,1), 1 },
+            postureTextOutline = true,
+            postureTextOutlineColor = Color3.new(),
 		}
 	}
 };
@@ -822,5 +877,14 @@ function EspInterface.getLifeforce(player)
     return 100, 100;
 end
 
---EspInterface.Load()
-return EspInterface
+function EspInterface.getPosture(player)
+    local character = player and EspInterface.getCharacter(player);
+    local posture = character and character:FindFirstChild("Posture");
+    if posture then
+        return posture.Value, posture.MaxValue;
+    end
+    return 100, 100;
+end
+
+EspInterface.Load()
+--return EspInterface
